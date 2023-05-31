@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import { createUser, findUser } from './auth.service'
 import verifyJwt from '../middleware/verifyJWT'
 import { prisma } from '../../db/prisma'
+import { handleError } from '../../utils/utils'
 
 export const authRouter = express.Router()
 
@@ -46,7 +47,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     // Create secure cookie with refresh token
     res.cookie('jwt', refreshToken, {
       httpOnly: true, //accessible only by web server
-      // secure: , //https
+      secure: process.env.NODE_ENV !== 'development',
       sameSite: 'none', //cross-site cookie
       maxAge: 7 * 24 * 60 * 60 * 1000, //cookie expiry: set to match
     })
@@ -54,10 +55,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
     // Send accessToken containing username and roles
     res.json({ accessToken })
   } catch (error) {
-    if (error instanceof Error) {
-      return res.status(500).json({ error: true, message: error.message })
-    }
-    res.status(500).json({ error })
+    handleError(res, error)
   }
 })
 
@@ -107,6 +105,14 @@ authRouter.get('/refresh', async (req: Request, res: Response) => {
       return res.status(500).json({ error: true, message: error.message })
     }
     res.status(500).json({ error })
+  }
+})
+
+authRouter.post('/register',async (req: Request, res: Response) => {
+  try {
+    
+  } catch (error) {
+    handleError(res, error)
   }
 })
 
